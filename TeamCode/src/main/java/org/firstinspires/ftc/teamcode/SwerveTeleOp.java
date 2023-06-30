@@ -63,8 +63,6 @@ public class SwerveTeleOp extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(new BNO055IMU.Parameters());
 
-        drive = new SampleMecanumDrive(hardwareMap);
-
         // Initialize PID controllers
         pidController1 = new PIDController(0.0, 0.0, 0.0);
         pidController2 = new PIDController(0.0, 0.0, 0.0);
