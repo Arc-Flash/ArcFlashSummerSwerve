@@ -19,6 +19,8 @@ public class SwerveTeleOp extends LinearOpMode {
     // Declare module servos
     private Servo servo1, servo2, servo3, servo4;
 
+    private double speedModifier = 0.75;
+
     // Declare IMU
     private BNO055IMU imu;
 
@@ -81,9 +83,9 @@ public class SwerveTeleOp extends LinearOpMode {
         // Run until the end of the match
         while (opModeIsActive()) {
             // Update joystick values
-            driveX = gamepad1.left_stick_x;
-            driveY = -gamepad1.left_stick_y;
-            rotate = -gamepad1.right_stick_x;
+            driveX = scaleJoystickValue(gamepad1.left_stick_x) * speedModifier;
+            driveY = -scaleJoystickValue(gamepad1.left_stick_y) * speedModifier;
+            rotate = -scaleJoystickValue(gamepad1.right_stick_x) * speedModifier;
 
             // Convert joystick values to field-centric drive if enabled
             if (fieldCentricDrive) {
@@ -114,6 +116,8 @@ public class SwerveTeleOp extends LinearOpMode {
             double power3 = calculateMotorPower(driveX, driveY, rotate, angle3);
             double power4 = calculateMotorPower(driveX, driveY, rotate, angle4);
 
+            double imuAngle = getHeading();
+
             motor1.setPower(power1);
             motor2.setPower(power2);
             motor3.setPower(power3);
@@ -127,8 +131,13 @@ public class SwerveTeleOp extends LinearOpMode {
             telemetry.addData("Angle 2", angle2);
             telemetry.addData("Angle 3", angle3);
             telemetry.addData("Angle 4", angle4);
+            telemetry.addData("IMU Angle", imuAngle);
             telemetry.update();
         }
+    }
+    private double scaleJoystickValue(double value) {
+        // Adjust the scaling based on your specific joystick behavior and desired range
+        return value * 0.75; // Scale the value by 1
     }
 
     private double calculateModuleAngle(double driveX, double driveY, double rotate, double baseAngle) {
@@ -151,7 +160,7 @@ public class SwerveTeleOp extends LinearOpMode {
         }
 
         // Scale joystick values and add PID output for motor power calculation
-        return Range.clip(driveX + rotate - pidOutput, -1.0, 1.0);
+        return Range.clip(driveX + driveY + rotate - pidOutput, -1.0, 1.0); //changed to drive X+y and -x -y to see if fix-it fixed
     }
 
     private double getModuleAngle(double baseAngle) {
