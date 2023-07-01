@@ -27,7 +27,7 @@ import org.firstinspires.ftc.teamcode.SwerveDrivetrain;
 import java.util.function.BooleanSupplier;
 
 @Config
-@TeleOp(name = "😈")
+@TeleOp(name = "😈😈😈😈😈😈")
 public class Teleop extends CommandOpMode {
     private ElapsedTime timer;
     private double loopTime = 0;
