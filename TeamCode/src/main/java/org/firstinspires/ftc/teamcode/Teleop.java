@@ -9,22 +9,12 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-
-import org.firstinspires.ftc.teamcode.SlewRateLimiter;
-import org.firstinspires.ftc.teamcode.SwerveDrivetrain;
-
-import java.util.function.BooleanSupplier;
 
 @Config
 @TeleOp(name = "😈😈😈😈😈😈")
@@ -40,9 +30,9 @@ public class Teleop extends CommandOpMode {
     private final RobotHardware robot = RobotHardware.getInstance();
     private SwerveDrivetrain drivetrain;
 
-    private SlewRateLimiter fw;
-    private SlewRateLimiter str;
-    private final PIDFController hController = new PIDFController(0.5, 0, 0.1, 0);
+    private SlewRateLimiter forwardLimiter;
+    private SlewRateLimiter steerLimiter;
+    private final PIDFController headingController = new PIDFController(0.5, 0, 0.1, 0);
 
     public static double fw_r = 4;
     public static double str_r = 4;
@@ -80,8 +70,8 @@ public class Teleop extends CommandOpMode {
         if (timer == null) {
             timer = new ElapsedTime();
             robot.startIMUThread(this);
-            fw = new SlewRateLimiter(fw_r);
-            str = new SlewRateLimiter(str_r);
+            forwardLimiter = new SlewRateLimiter(fw_r);
+            steerLimiter = new SlewRateLimiter(str_r);
         }
 
         robot.read(drivetrain);
@@ -94,8 +84,8 @@ public class Teleop extends CommandOpMode {
             lock_robot_heading = false;
         }
 
-        double error = normalizeRadians(normalizeRadians(targetHeading) - normalizeRadians(robot.getAngle()));
-        double headingCorrection = -hController.calculate(0, error) * 12.4 / robot.getVoltage();
+        double angleError = normalizeRadians(normalizeRadians(targetHeading) - normalizeRadians(robot.getAngle()));
+        double headingCorrection = -headingController.calculate(0, angleError) * 12.4 / robot.getVoltage();
 
         if (Math.abs(headingCorrection) < 0.01) {
             headingCorrection = 0;
@@ -117,8 +107,8 @@ public class Teleop extends CommandOpMode {
         );
 
         drive = new Pose(
-                fw.calculate(drive.x),
-                str.calculate(drive.y),
+                forwardLimiter.calculate(drive.x),
+                steerLimiter.calculate(drive.y),
                 drive.heading
         );
 
