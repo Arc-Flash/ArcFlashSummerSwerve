@@ -87,7 +87,7 @@ public class SwerveModule {
     }
 
     /**
-     * Update Swerve Module by Adjusting Angle Error and Drive Power
+     * Update Swerve Module by Adjusting Angle Error in Radians and Drive Power Percentage
      * */
     public void update() {
         rotationController.setPIDF(P, I, D, 0);
