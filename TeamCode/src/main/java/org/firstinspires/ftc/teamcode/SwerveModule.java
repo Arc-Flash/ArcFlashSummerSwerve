@@ -103,9 +103,9 @@ public class SwerveModule {
 
         angleError = normalizeRadians(rotationTarget - currentAngle);
 
-        double drivePower = Range.clip(rotationController.calculate(0, angleError), -MAX_SERVO, MAX_SERVO);
-        if (Double.isNaN(drivePower)) drivePower = 0;
-        servo.setPower(drivePower + (Math.abs(angleError) > 0.02 ? K_STATIC : 0) * Math.signum(drivePower));
+        double steerPower = Range.clip(rotationController.calculate(0, angleError), -MAX_SERVO, MAX_SERVO);
+        if (Double.isNaN(steerPower)) steerPower = 0;
+        servo.setPower(steerPower + (Math.abs(angleError) > 0.02 ? K_STATIC : 0) * Math.signum(steerPower));
     }
     /** Get  Target Module Rotation
      * @return Target Module Rotation in Radians */
