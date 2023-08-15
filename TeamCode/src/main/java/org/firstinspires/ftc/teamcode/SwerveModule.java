@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.teamcode.AbsoluteAnalogEncoder;
 
 import java.util.Locale;
 
@@ -34,144 +33,215 @@ public class SwerveModule {
     public static double GEAR_RATIO = 1 / (1.5 * 2 * 2); // output (wheel) speed / input (motor) speed
     public static final double TICKS_PER_REV = 28;
 
-    private DcMotorEx motor;
+    private DcMotorEx driveMotor;
     private CRServo servo;
-    private AbsoluteAnalogEncoder encoder;
+    private AbsoluteAnalogEncoder absoluteAnalogEncoder;
     private PIDFController rotationController;
 
     public boolean wheelFlipped = false;
-    private double target = 0.0;
-    private double position = 0.0;
+    private double targetAngle = 0.0;
+    private double moduleAngle = 0.0;
+    public double lastMotorPower = 0;
 
-    public SwerveModule(DcMotorEx m, CRServo s, AbsoluteAnalogEncoder e) {
-        motor = m;
-        MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
+
+    /**
+    * Swerve Module Declaration
+    * @param driveMotor DCMotor for Drive
+    * @param servo CRServo for Steer
+    * @param absoluteAnalogEncoder AnalogEncoder for Absolute Position
+    * */
+    public SwerveModule(DcMotorEx driveMotor, CRServo servo, AbsoluteAnalogEncoder absoluteAnalogEncoder) {
+        this.driveMotor = driveMotor;
+        MotorConfigurationType motorConfigurationType = this.driveMotor.getMotorType().clone();
         motorConfigurationType.setAchieveableMaxRPMFraction(MAX_MOTOR);
-        motor.setMotorType(motorConfigurationType);
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.driveMotor.setMotorType(motorConfigurationType);
+        this.driveMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        servo = s;
-        ((CRServoImplEx) servo).setPwmRange(new PwmControl.PwmRange(500, 2500, 5000));
+        this.servo = servo;
+        ((CRServoImplEx) this.servo).setPwmRange(new PwmControl.PwmRange(500, 2500, 5000));
 
-        encoder = e;
+        this.absoluteAnalogEncoder = absoluteAnalogEncoder;
         rotationController = new PIDFController(P, I, D, 0);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.driveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    /**
+     * Alternate Swerve Module Declaration
+     * @param hardwareMap Robot Hardware Map
+     * @param motorName Drive Motor Name
+     * @param servoName Servo Name
+     * @param absoluteAnalogEncoderName Absolute Encoder Name
+     * */
+
+    public SwerveModule(HardwareMap hardwareMap, String motorName, String servoName, String absoluteAnalogEncoderName) {
+        this(hardwareMap.get(DcMotorEx.class, motorName),
+                hardwareMap.get(CRServo.class, servoName),
+                new AbsoluteAnalogEncoder(hardwareMap.get(AnalogInput.class, absoluteAnalogEncoderName)));
     }
 
-    public SwerveModule(HardwareMap hardwareMap, String mName, String sName, String eName) {
-        this(hardwareMap.get(DcMotorEx.class, mName),
-                hardwareMap.get(CRServo.class, sName),
-                new AbsoluteAnalogEncoder(hardwareMap.get(AnalogInput.class, eName)));
-    }
-
+    /**
+     * Read Swerve Module Absolute Angle
+     * @return Module Absolute Angle in Radians
+     */
     public void read() {
-        position = encoder.getCurrentPosition();
+        moduleAngle = absoluteAnalogEncoder.getCurrentPosition();
     }
 
+    /**
+     * Update Swerve Module by Adjusting Angle Error in Radians and Drive Power Percentage
+     * */
     public void update() {
         rotationController.setPIDF(P, I, D, 0);
-        double target = getTargetRotation(), current = getModuleRotation();
+        double rotationTarget = getTargetRotation(), currentAngle = getModuleRotation();
 
-        double error = normalizeRadians(target - current);
-        if (MOTOR_FLIPPING && Math.abs(error) > Math.PI / 2) {
-            target = normalizeRadians(target - Math.PI);
+        double angleError = normalizeRadians(rotationTarget - currentAngle);
+        if (MOTOR_FLIPPING && Math.abs(angleError) > Math.PI / 2) {
+            rotationTarget = normalizeRadians(rotationTarget - Math.PI);
             wheelFlipped = true;
         } else {
             wheelFlipped = false;
         }
 
-        error = normalizeRadians(target - current);
+        angleError = normalizeRadians(rotationTarget - currentAngle);
 
-        double power = Range.clip(rotationController.calculate(0, error), -MAX_SERVO, MAX_SERVO);
-        if (Double.isNaN(power)) power = 0;
-        servo.setPower(power + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power));
+        double steerPower = Range.clip(rotationController.calculate(0, angleError), -MAX_SERVO, MAX_SERVO);
+        if (Double.isNaN(steerPower)) steerPower = 0;
+        servo.setPower(steerPower + (Math.abs(angleError) > 0.02 ? K_STATIC : 0) * Math.signum(steerPower));
     }
+    /** Get  Target Module Rotation
+     * @return Target Module Rotation in Radians */
 
     public double getTargetRotation() {
-        return normalizeRadians(target - Math.PI);
+        return normalizeRadians(targetAngle - Math.PI);
     }
-
+    /** Get Actual Module Rotation
+     * @return Actual Module Rotation in Radians */
     public double getModuleRotation() {
-        return normalizeRadians(position - Math.PI);
+        return normalizeRadians(moduleAngle - Math.PI);
     }
-
-    public void setMotorPower(double power) {
-        if (wheelFlipped) power *= -1;
-        lastMotorPower = power;
-        motor.setPower(power);
+  /**
+   * Set Drive Motor Power
+   * @param drivePower Drive Power Percentage
+*/
+    public void setMotorPower(double drivePower) {
+        if (wheelFlipped) drivePower *= -1;
+        lastMotorPower = drivePower;
+        driveMotor.setPower(drivePower);
     }
-
-    public void setTargetRotation(double target) {
-        this.target = normalizeRadians(target);
+    /**
+     * Set Target Module Rotation
+     * @param targetAngle Target Module Rotation in Radians
+     * */
+    public void setTargetRotation(double targetAngle) {
+        this.targetAngle = normalizeRadians(targetAngle);
     }
-
-    public String getTelemetry(String name) {
-        return String.format(Locale.ENGLISH, "%s: Motor Flipped: %b \ncurrent position %.2f target position %.2f flip modifer = %d motor power = %.2f", name, wheelFlipped, getModuleRotation(), getTargetRotation(), flipModifier(), lastMotorPower);
+    /**
+     * Get Module Telemetry
+     * @return Telemetry String
+     * */
+    public String getTelemetry(String moduleName) {
+        return String.format(Locale.ENGLISH, "%s: Motor Flipped: %b \ncurrent position %.2f target position %.2f flip modifer = %d motor power = %.2f", moduleName, wheelFlipped, getModuleRotation(), getTargetRotation(), flipModifier(), lastMotorPower);
     }
-
+    /**
+     * Flip Modifier for Wheel Inversion
+     * @return Wheel Inversion Boolean
+     * */
     public int flipModifier() {
         return wheelFlipped ? -1 : 1;
     }
 
-
-    public void setMode(DcMotor.RunMode runMode) {
-        motor.setMode(runMode);
+    /**
+     * Set Drive Motor Run Mode
+     * @param runMode DcMotor RunMode
+     * */
+    public void setDriveMotorMode(DcMotor.RunMode runMode) {
+        driveMotor.setMode(runMode);
     }
-
+    /**
+     * Set Drive Motor Zero Power Behavior
+     * @param zeroPowerBehavior DcMotor ZeroPowerBehavior
+     * */
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
-        motor.setZeroPowerBehavior(zeroPowerBehavior);
+        driveMotor.setZeroPowerBehavior(zeroPowerBehavior);
     }
-
+    /**
+     * Set PID Coefficients for Drive Motor
+     * @param runMode DcMotor RunMode
+     * @param coefficients PID Coefficients for Drive Motor
+     * */
     public void setPIDFCoefficients(DcMotor.RunMode runMode, PIDFCoefficients coefficients) {
-        motor.setPIDFCoefficients(runMode, coefficients);
+        driveMotor.setPIDFCoefficients(runMode, coefficients);
     }
 
-    public double lastMotorPower = 0;
-
+   /**
+   * Get Servo Power
+   * @return Servo Power Percentage
+   * */
     public double getServoPower() {
         return servo.getPower();
     }
-
+    /**
+     * Get Wheel Position
+     * @return Drive Motor Position in Inches
+     * */
     public double getWheelPosition() {
-        return encoderTicksToInches(motor.getCurrentPosition());
+        return encoderTicksToInches(driveMotor.getCurrentPosition());
     }
-
+    /**
+     * Get Wheel Velocity
+     * @return Drive Motor Velocity in Inches per Second
+     * */
     public double getWheelVelocity() {
-        return encoderTicksToInches(motor.getVelocity());
+        return encoderTicksToInches(driveMotor.getVelocity());
     }
 
+    //idk what this is
     public SwerveModuleState asState() {
         return new SwerveModuleState(this);
     }
 
+
+    // Class for Storing The State of a Swerve Module in terms of its Wheel Position and Module Rotation
     public static class SwerveModuleState {
         public SwerveModule module;
-        public double wheelPos, podRot;
+        public double wheelPosition, moduleRotation;
 
-        public SwerveModuleState(SwerveModule s) {
-            module = s;
-            wheelPos = 0;
-            podRot = 0;
+
+        /** Class for Storing The State of a Swerve Module in terms of its Wheel Position and Module Rotation
+         * @param swerveModule Swerve Module Object
+         * */
+        public SwerveModuleState(SwerveModule swerveModule) {
+            module = swerveModule;
+            wheelPosition = 0;
+            moduleRotation = 0;
         }
-
+        /**
+         * Update SwerveModule State
+         * */
         public SwerveModuleState update() {
             return setState(-module.getWheelPosition(), module.getModuleRotation());
         }
-
-        public SwerveModuleState setState(double wheel, double pod) {
-            wheelPos = wheel;
-            podRot = pod;
+        /**
+         * Set Swerve Module State
+         * @param moduleRotation Module Rotation in Radians
+         * @param wheelPosition Wheel Position in Ticks
+         * */
+        public SwerveModuleState setState(double wheelPosition, double moduleRotation) {
+            this.wheelPosition = wheelPosition;
+            this.moduleRotation = moduleRotation;
             return this;
         }
 
         //TODO add averaging for podrots based off of past values
         public Vector2d calculateDelta() {
-            double oldWheel = wheelPos;
+            double oldWheelPosition = wheelPosition;
             update();
-            return Vector2d.polar(wheelPos - oldWheel, podRot);
+            return Vector2d.polar(wheelPosition - oldWheelPosition, moduleRotation);
         }
     }
-
+     /**
+      * Convert from Encoder Ticks to Inches
+      * @param ticks Encoder Ticks
+      * */
     public double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
     }

@@ -6,12 +6,6 @@ import static java.lang.Math.hypot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.AbsoluteAnalogEncoder;
-import org.firstinspires.ftc.teamcode.Drivetrain;
-import org.firstinspires.ftc.teamcode.MathUtils;
-import org.firstinspires.ftc.teamcode.Pose;
-import org.firstinspires.ftc.teamcode.RobotHardware;
-
 import static org.firstinspires.ftc.teamcode.Globals.*;
 
 @Config
@@ -25,15 +19,22 @@ public class SwerveDrivetrain {
 
     public static boolean maintainHeading = false;
 
-    double[] ws = new double[4];
-    double[] wa = new double[4];
-    double max = 0.0;
+    double[] feedforward_static = new double[4];
+    double[] feedforward_acceleration = new double[4];
 
-    public final double minPow = 0.1;
+
+    double maxPower = 0.0;
+
+    public final double minPower = 0.1;
     public static double imuOffset = 0.0;
 
-    private boolean locked = false;
+    private boolean fieldOriented = false;
 
+
+    /**
+     * Swerve Drive Declaration
+     * @param robot Robot Hardware Map
+     * */
     public SwerveDrivetrain(RobotHardware robot) {
         frontLeftModule = new SwerveModule(robot.frontLeftMotor, robot.frontLeftServo, new AbsoluteAnalogEncoder(robot.frontLeftEncoder, 3.3).zero(frontLeftOffset).setInverted(true));
         backLeftModule = new SwerveModule(robot.backLeftMotor, robot.backLeftServo, new AbsoluteAnalogEncoder(robot.backLeftEncoder, 3.3).zero(backLeftOffset).setInverted(true));
@@ -41,55 +42,81 @@ public class SwerveDrivetrain {
         frontRightModule = new SwerveModule(robot.frontRightMotor, robot.frontRightServo, new AbsoluteAnalogEncoder(robot.frontRightEncoder, 3.3).zero(frontRightOffset).setInverted(true));
 
         modules = new SwerveModule[]{frontLeftModule, frontRightModule, backRightModule, backLeftModule};
-        for (SwerveModule m : modules) m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        for (SwerveModule m : modules) m.setDriveMotorMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         R = hypot(TRACK_WIDTH, WHEEL_BASE);
     }
-
+    /**
+     * Get Absolute Angles from Modules
+     * */
     public void read() {
         for (SwerveModule module : modules) module.read();
     }
 
-
+    /**
+     * Set Swerve Pose
+     * @param pose Pose in 2d Space including X,Y and Heading components
+     * */
     public void set(Pose pose) {
         double x = pose.x, y = pose.y, head = pose.heading;
 
+
+        //Swerve Kinematics I presume
         double a = x - head * (WHEEL_BASE / R),
                 b = x + head * (WHEEL_BASE / R),
                 c = y - head * (TRACK_WIDTH / R),
                 d = y + head * (TRACK_WIDTH / R);
 
-        if (locked) {
-            ws = new double[]{0, 0, 0, 0};
-            wa = new double[]{Math.PI / 4, -Math.PI / 4, Math.PI / 4, -Math.PI / 4};
+
+        //robot-oriented
+        if (fieldOriented) {
+            feedforward_static = new double[]{0, 0, 0, 0};
+            feedforward_acceleration = new double[]{Math.PI / 4, -Math.PI / 4, Math.PI / 4, -Math.PI / 4};
         } else {
-            ws = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
-            if (!maintainHeading) wa = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
+            //field-oriented
+            feedforward_static = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
+            if (!maintainHeading) feedforward_acceleration = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
         }
 
-        max = MathUtils.max(ws);
+        maxPower = MathUtils.max(feedforward_static);
     }
-
+    /**
+     * Set Power to Drive Motors and Set Target Angle for Servos
+     * */
     public void write() {
         for (int i = 0; i < 4; i++) {
             SwerveModule m = modules[i];
-            if (Math.abs(max) > 1) ws[i] /= max;
-            m.setMotorPower(Math.abs(ws[i]) + ((USE_WHEEL_FEEDFORWARD) ? minPow * Math.signum(ws[i]) : 0));
-            m.setTargetRotation(MathUtils.norm(wa[i]));
+            if (Math.abs(maxPower) > 1) feedforward_static[i] /= maxPower;
+            m.setMotorPower(Math.abs(feedforward_static[i]) + ((USE_WHEEL_FEEDFORWARD) ? minPower * Math.signum(feedforward_static[i]) : 0));
+            m.setTargetRotation(MathUtils.norm(feedforward_acceleration[i]));
         }
     }
-
+  /**
+   * Update Swerve Modules
+   * */
     public void updateModules() {
         for (SwerveModule m : modules) m.update();
     }
 
-    public void setLocked(boolean locked){
-        this.locked = locked;
+    /**
+     * Set Field Oriented
+     * @param fieldOriented Field Oriented Boolean
+     * */
+    public void setFieldOriented(boolean fieldOriented){
+        this.fieldOriented = fieldOriented;
+    }
+    /**
+     * Get If Field Oriented
+     * @return Field Oriented Boolean
+     * */
+    public boolean isFieldOriented(){
+        return fieldOriented;
     }
 
-    public boolean isLocked(){
-        return locked;
-    }
 
+   /**
+    * Get Swerve Telemetry String
+    * @return Individual Module Telemtery Strings
+    * */
     public String getTelemetry() {
         return frontLeftModule.getTelemetry("leftFrontModule") + "\n" +
                 backLeftModule.getTelemetry("leftRearModule") + "\n" +
