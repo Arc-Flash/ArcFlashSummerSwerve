@@ -80,9 +80,9 @@ public class PFOdometry extends AbstractOdometry {
         //Placeholder
         if(detection.decisionMargin > 30 ){
         odometry.offsetSoPositionIs( new PointXYZ(
-                AprilTagFieldConstants.getTagPose(detection.id).x() - detection.pose.x,
-                AprilTagFieldConstants.getTagPose(detection.id).y() - detection.pose.y,
-                AprilTagFieldConstants.getTagPose(detection.id).z().rad() - detection.pose.z));
+                AprilTagFieldConstants.getTagPose(detection.id).x() + detection.pose.x,
+                AprilTagFieldConstants.getTagPose(detection.id).y() + detection.pose.y,
+                AprilTagFieldConstants.getTagPose(detection.id).z().rad() + detection.pose.z));
     }
         PointXYZ position = odometry.getPosition();
         return position;
