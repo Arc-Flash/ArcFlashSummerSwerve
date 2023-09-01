@@ -61,7 +61,7 @@ public class Teleop extends CommandOpMode {
         gamepadEx = new GamepadEx(gamepad1);
         gamepadEx2 = new GamepadEx(gamepad2);
 
-        pathfinder = new PFinder();
+        pathfinder = new PFinder(robot);
 
         robot.enabled = true;
 

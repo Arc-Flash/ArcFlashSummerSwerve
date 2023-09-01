@@ -44,6 +44,7 @@ public class RobotHardware {
     public Motor.Encoder intakeEncoder;
     public Motor.Encoder parallelPod;
     public Motor.Encoder perpindicularPod;
+    public Motor.Encoder centerPod;
 
     private final Object imuLock = new Object();
     @GuardedBy("imuLock")
@@ -106,6 +107,11 @@ public class RobotHardware {
         parallelPod.setDirection(Motor.Direction.REVERSE);
         perpindicularPod = new MotorEx(hardwareMap, "backRightMotor").encoder;
         perpindicularPod.setDirection(Motor.Direction.REVERSE);
+
+        //Placeholder
+        centerPod = new MotorEx(hardwareMap, "frontLeftMotor").encoder;
+        centerPod.setDirection(Motor.Direction.REVERSE);
+
 
         voltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }

@@ -31,24 +31,34 @@ public class PFinder {
     private static final double TOLERANCE = 1.0;
     private static final Angle ANGLE_TOLERANCE = Angle.fromDeg(15);
 
-    private final RobotHardware robotMap = RobotHardware.getInstance();
+    private final RobotHardware robotMap;
     private final Controller turnController = new GenericTurnController(0.1);
     private final FollowerGenerator followerGenerator = new GenericFollowerGenerator(
             turnController
     );
-    private final Drive drive = new PFDrive(robotMap, turnController, 0.1);
-    private final Odometry odometry = new PFOdometry();
-    private final Robot robot = new Robot(drive, odometry);
-    private final Pathfinder pathfinder = new Pathfinder(
-            robot,
-            followerGenerator
-    );
+    private final Drive drive;
+    private final Odometry odometry;
+    private final Robot robot;
+    private final Pathfinder pathfinder;
 
-    public PFinder() {
+    public PFinder(RobotHardware robotMap) {
+
+        this.robotMap = robotMap;
+
+        drive = new PFDrive(robotMap, turnController, 0.1);
+        odometry = new PFOdometry(robotMap);
+        robot = new Robot(drive, odometry);
+        pathfinder = new Pathfinder(
+                robot,
+                followerGenerator
+        );
+
         pathfinder.setSpeed(SPEED);
         pathfinder.setTolerance(TOLERANCE);
         pathfinder.setAngleTolerance(ANGLE_TOLERANCE);
     }
+
+
 
     public void teleopDrive(GamepadEx gamepadEx){
 

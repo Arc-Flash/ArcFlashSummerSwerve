@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.pathfinder;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+
+import org.firstinspires.ftc.teamcode.RobotHardware;
+
 import me.wobblyyyy.pathfinder2.geometry.PointXYZ;
 import me.wobblyyyy.pathfinder2.odometrycore.ThreeWheelOdometry;
 import me.wobblyyyy.pathfinder2.robot.AbstractOdometry;
@@ -22,14 +26,20 @@ public class PFOdometry extends AbstractOdometry {
     private static final double OFFSET_CENTER = 0.0;
 
     // PLACEHOLDER!!!!!
-    private Encoder leftEncoder = null;
-    private Encoder rightEncoder = null;
-    private Encoder centerEncoder = null;
+    private Motor.Encoder leftEncoder;
+    private Motor.Encoder rightEncoder;
+    private Motor.Encoder centerEncoder;
 
     /**
      * Create a new instance of the {@code Robot} class to demonstrate how
      * {@link PFOdometry} is instantiated.
      */
+
+        public PFOdometry(RobotHardware robotMap){
+            leftEncoder = robotMap.parallelPod;
+            rightEncoder = robotMap.perpindicularPod;
+            centerEncoder = robotMap.centerPod;
+        }
 
 
 
@@ -45,9 +55,9 @@ public class PFOdometry extends AbstractOdometry {
 
 
         ThreeWheelOdometry.EncoderProfile encoderProfile = new ThreeWheelOdometry.EncoderProfile(
-                () -> (double) leftEncoder.getTicks(),
-                () -> (double) rightEncoder.getTicks(),
-                () -> (double) centerEncoder.getTicks()
+                () -> (double) leftEncoder.getPosition(),
+                () -> (double) rightEncoder.getPosition(),
+                () -> (double) centerEncoder.getPosition()
         );
 
         // initialize ThreeWheelOdometry
