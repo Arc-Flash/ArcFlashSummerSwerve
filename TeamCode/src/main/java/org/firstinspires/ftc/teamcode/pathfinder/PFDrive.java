@@ -134,4 +134,12 @@ public class PFDrive implements Drive {
     public void setDriveModifier(Function<Translation, Translation> modifier) {
         this.modifier = modifier;
     }
+
+    public String getTelemetry() {
+
+        return frontLeftModule.getTelemetry("leftFrontModule") + "\n" +
+                backLeftModule.getTelemetry("leftRearModule") + "\n" +
+                frontRightModule.getTelemetry("rightFrontModule") + "\n" +
+                backRightModule.getTelemetry("rightRearModule") + "\n";
+    }
 }

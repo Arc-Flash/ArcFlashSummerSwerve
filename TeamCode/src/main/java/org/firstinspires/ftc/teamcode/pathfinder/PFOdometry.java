@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
+import java.util.Locale;
+
 import me.wobblyyyy.pathfinder2.geometry.PointXYZ;
 import me.wobblyyyy.pathfinder2.odometrycore.ThreeWheelOdometry;
 import me.wobblyyyy.pathfinder2.robot.AbstractOdometry;
@@ -71,6 +73,11 @@ public class PFOdometry extends AbstractOdometry {
     public PointXYZ getRawPosition() {
         PointXYZ position = odometry.getPosition();
         return position;
+    }
+
+    public String getTelemetry(){
+        return String.format(Locale.ENGLISH,"X Position: .2%f \nY Position: .2%f \nZ Position: .2%f ", getX(),getY(),getZ());
+
     }
 }
 

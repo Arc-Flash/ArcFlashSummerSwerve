@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.SwerveModule;
 
+import me.wobblyyyy.pathfinder2.control.PIDController;
 import me.wobblyyyy.pathfinder2.robot.Drive;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class PFinder {
     private static final Angle ANGLE_TOLERANCE = Angle.fromDeg(15);
 
     private final RobotHardware robotMap;
-    private final Controller turnController = new GenericTurnController(0.1);
+    private final Controller turnController = new PIDController(0.6,0,0.1);
     private final FollowerGenerator followerGenerator = new GenericFollowerGenerator(
             turnController
     );
