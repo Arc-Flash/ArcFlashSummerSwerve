@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.apriltag.AprilTagCamera;
+import org.firstinspires.ftc.teamcode.apriltag.AprilTagFieldConstants;
 import org.openftc.apriltag.AprilTagDetection;
 
 import java.util.Locale;
@@ -78,7 +79,10 @@ public class PFOdometry extends AbstractOdometry {
         AprilTagDetection detection = camera.getLastDetection();
         //Placeholder
         if(detection.decisionMargin > 30 ){
-        odometry.offsetSoPositionIs( new PointXYZ(detection.pose.x,detection.pose.y,detection.pose.z));
+        odometry.offsetSoPositionIs( new PointXYZ(
+                AprilTagFieldConstants.getTagPose(detection.id).x() - detection.pose.x,
+                AprilTagFieldConstants.getTagPose(detection.id).y() - detection.pose.y,
+                AprilTagFieldConstants.getTagPose(detection.id).z().rad() - detection.pose.z));
     }
         PointXYZ position = odometry.getPosition();
         return position;
