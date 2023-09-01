@@ -11,17 +11,7 @@ import me.wobblyyyy.pathfinder2.geometry.Angle;
 import me.wobblyyyy.pathfinder2.kinematics.RelativeSwerveModuleState;
 import me.wobblyyyy.pathfinder2.robot.components.Motor;
 
-/**
- * A representation of a swerve module. In a typical swerve drive chassis,
- * there are four swerve modules - the front right, the front left, the
- * back right, and the back left modules. Each of these modules is composed
- * of two motors - the turn motor and the drive motor. In short, the turn
- * motor can control the angle at which the drive motor is facing, and the
- * drive motor can actually drive the robot.
- *
- * @author Colin Robertson
- * @since 0.0.0
- */
+
 @Config
 public class PFModule {
 

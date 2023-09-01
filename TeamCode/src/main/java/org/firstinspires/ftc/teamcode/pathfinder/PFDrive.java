@@ -13,23 +13,7 @@ import me.wobblyyyy.pathfinder2.kinematics.RelativeSwerveModuleState;
 import me.wobblyyyy.pathfinder2.kinematics.RelativeSwerveState;
 import me.wobblyyyy.pathfinder2.robot.Drive;
 
-/**
- * A very simple (and very lovely) swerve drive implementation.
- *
- * <p>
- * A swerve drive (or at least this type of swerve drive) is a type of
- * drive system that has eight motors in total. The swerve chassis is
- * composed of four {@link SwerveModule}s, each of which contain two
- * motors. One of these motors controls the direction the module is facing,
- * and the other motor controls the robot's actual movement on the ground.
- * Most simply, a swerve chassis works by rotating all of the swerve
- * modules to the angle that corresponds with the direction it should move
- * in and then moving in that direction.
- * </p>
- *
- * @author Colin Robertson
- * @since 0.0.0
- */
+
 public class PFDrive implements Drive {
 
     private final PFModule frontRightModule;
