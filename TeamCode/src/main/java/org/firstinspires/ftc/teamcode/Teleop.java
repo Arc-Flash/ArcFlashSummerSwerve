@@ -16,6 +16,8 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.pathfinder.PFinder;
+
 @Config
 @TeleOp(name = "😈😈😈😈😈😈")
 public class Teleop extends CommandOpMode {
@@ -29,6 +31,7 @@ public class Teleop extends CommandOpMode {
 
     private final RobotHardware robot = RobotHardware.getInstance();
     private SwerveDrivetrain drivetrain;
+    private PFinder pathfinder;
 
     private SlewRateLimiter forwardLimiter;
     private SlewRateLimiter steerLimiter;
@@ -37,6 +40,8 @@ public class Teleop extends CommandOpMode {
     public static double fw_r = 4;
     public static double str_r = 4;
     private boolean lock_robot_heading = false;
+
+
 
     GamepadEx gamepadEx, gamepadEx2;
     Localizer localizer;
@@ -55,6 +60,8 @@ public class Teleop extends CommandOpMode {
         drivetrain = new SwerveDrivetrain(robot);
         gamepadEx = new GamepadEx(gamepad1);
         gamepadEx2 = new GamepadEx(gamepad2);
+
+        pathfinder = new PFinder();
 
         robot.enabled = true;
 
@@ -122,6 +129,10 @@ public class Teleop extends CommandOpMode {
         telemetry.update();
 
         robot.clearBulkCache();
+
+        //PATHFINDER TELEOP, Don't run before commenting other drive stuff
+        pathfinder.teleopDrive(gamepadEx);
+        pathfinder.loop();
     }
 
     private double joystickScalar(double num, double min) {
