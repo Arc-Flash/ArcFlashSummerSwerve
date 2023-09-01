@@ -20,6 +20,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Globals;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -45,6 +47,9 @@ public class RobotHardware {
     public Motor.Encoder parallelPod;
     public Motor.Encoder perpindicularPod;
     public Motor.Encoder centerPod;
+
+    public int cameraMonitorViewId;
+    public OpenCvCamera camera;
 
     private final Object imuLock = new Object();
     @GuardedBy("imuLock")
@@ -112,6 +117,8 @@ public class RobotHardware {
         centerPod = new MotorEx(hardwareMap, "frontLeftMotor").encoder;
         centerPod.setDirection(Motor.Direction.REVERSE);
 
+        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         voltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }

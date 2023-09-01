@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.pathfinder;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.SwerveModule;
+import org.firstinspires.ftc.teamcode.apriltag.AprilTagCamera;
 
 import me.wobblyyyy.pathfinder2.control.PIDController;
 import me.wobblyyyy.pathfinder2.robot.Drive;
@@ -39,6 +41,7 @@ public class PFinder {
     );
     private final Drive drive;
     private final Odometry odometry;
+    private final AprilTagCamera camera;
     private final Robot robot;
     private final Pathfinder pathfinder;
 
@@ -47,7 +50,8 @@ public class PFinder {
         this.robotMap = robotMap;
 
         drive = new PFDrive(robotMap, turnController, 0.1);
-        odometry = new PFOdometry(robotMap);
+        camera = new AprilTagCamera(robotMap);
+        odometry = new PFOdometry(robotMap,camera);
         robot = new Robot(drive, odometry);
         pathfinder = new Pathfinder(
                 robot,
@@ -98,7 +102,7 @@ public class PFinder {
         pathfinder.followTrajectories(trajectories);
     }
     public void loop() {
-
+        camera.loop();
         pathfinder.tick();
     }
 }

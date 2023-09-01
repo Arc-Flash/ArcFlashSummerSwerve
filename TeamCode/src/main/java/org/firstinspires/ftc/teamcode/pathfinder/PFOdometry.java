@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.pathfinder;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.apriltag.AprilTagCamera;
+import org.openftc.apriltag.AprilTagDetection;
 
 import java.util.Locale;
 
@@ -31,16 +33,18 @@ public class PFOdometry extends AbstractOdometry {
     private Motor.Encoder leftEncoder;
     private Motor.Encoder rightEncoder;
     private Motor.Encoder centerEncoder;
+    private AprilTagCamera camera;
 
     /**
      * Create a new instance of the {@code Robot} class to demonstrate how
      * {@link PFOdometry} is instantiated.
      */
 
-        public PFOdometry(RobotHardware robotMap){
+        public PFOdometry(RobotHardware robotMap, AprilTagCamera camera){
             leftEncoder = robotMap.parallelPod;
             rightEncoder = robotMap.perpindicularPod;
             centerEncoder = robotMap.centerPod;
+            this.camera = camera;
         }
 
 
@@ -71,6 +75,11 @@ public class PFOdometry extends AbstractOdometry {
 
     @Override
     public PointXYZ getRawPosition() {
+        AprilTagDetection detection = camera.getLastDetection();
+        //Placeholder
+        if(detection.decisionMargin > 30 ){
+        odometry.offsetSoPositionIs( new PointXYZ(detection.pose.x,detection.pose.y,detection.pose.z));
+    }
         PointXYZ position = odometry.getPosition();
         return position;
     }
