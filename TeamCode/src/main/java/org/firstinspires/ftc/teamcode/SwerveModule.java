@@ -22,10 +22,10 @@ import java.util.Locale;
 
 @Config
 public class SwerveModule {
-    public static double P = 0.6, I = 0, D = 0.1;
+    public static double P = 0.6, I = 0.15, D = 0.2;
     public static double K_STATIC = 0.03;
 
-    public static double MAX_SERVO = .95, MAX_MOTOR = 0.2; //max speed of either, motor at 20% now for testing
+    public static double MAX_SERVO = .95, MAX_MOTOR = 0.95; //max speed of either, motor at 50% now for testing
 
     public static boolean MOTOR_FLIPPING = true;
 
@@ -61,7 +61,7 @@ public class SwerveModule {
         ((CRServoImplEx) this.servo).setPwmRange(new PwmControl.PwmRange(505, 2495, 5000));
 
         this.absoluteAnalogEncoder = absoluteAnalogEncoder;
-        rotationController = new PIDFController(P, I, D, 0.4);
+        rotationController = new PIDFController(P, I, D, 0);
         this.driveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
     /**
@@ -90,7 +90,7 @@ public class SwerveModule {
      * Update Swerve Module by Adjusting Angle Error in Radians and Drive Power Percentage
      * */
     public void update() {
-        rotationController.setPIDF(P, I, D, 0.4);
+        rotationController.setPIDF(P, I, D, 0);
         double rotationTarget = getTargetRotation(), currentAngle = getModuleRotation();
 
         double angleError = normalizeRadians(rotationTarget - currentAngle);
