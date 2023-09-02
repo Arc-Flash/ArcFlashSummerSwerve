@@ -67,7 +67,7 @@ public class PFinder {
 
     public void teleopDrive(GamepadEx gamepadEx){
 
-        while (true) {
+
             double x = gamepadEx.getLeftX();
             double y = gamepadEx.getLeftY();
             double z = gamepadEx.getRightX();
@@ -77,7 +77,7 @@ public class PFinder {
             Translation absoluteTranslation = translation.toRelative(Angle.fromRad(robotMap.getAngle()));
 
             pathfinder.setTranslation(absoluteTranslation);
-        }
+
 
     }
 

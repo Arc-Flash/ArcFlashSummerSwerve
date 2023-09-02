@@ -24,9 +24,9 @@ public class PFModule {
 
 
 
-    private DcMotorEx driveMotor;
-    private CRServo servo;
-    private AbsoluteAnalogEncoder absoluteAnalogEncoder;
+    private final DcMotorEx driveMotor;
+    private final CRServo servo;
+    private final AbsoluteAnalogEncoder absoluteAnalogEncoder;
     private RelativeSwerveModuleState targetState;
 
     public static double  MAX_SERVO = .95, MAX_MOTOR = 0.2;

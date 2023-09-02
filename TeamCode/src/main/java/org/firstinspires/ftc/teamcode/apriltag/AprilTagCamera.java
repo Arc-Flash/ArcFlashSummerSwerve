@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.apriltag;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
+import android.annotation.SuppressLint;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -72,6 +74,7 @@ public class AprilTagCamera {
         return detections.get(detections.size()-1);
     }
 
+    @SuppressLint("DefaultLocale")
     public void loop(){
         detections = aprilTagDetectionPipeline.getDetectionsUpdate();
 
@@ -81,8 +84,8 @@ public class AprilTagCamera {
 
 
             telemetry.addLine(String.format("FPS: .2%f", camera.getFps()));
-            telemetry.addLine(String.format("Overhead ms: .2%f", camera.getOverheadTimeMs()));
-            telemetry.addLine(String.format("Pipeline ms: .2%f", camera.getPipelineTimeMs()));
+            telemetry.addLine(String.format("Overhead ms: .2%d", camera.getOverheadTimeMs()));
+            telemetry.addLine(String.format("Pipeline ms: .2%d", camera.getPipelineTimeMs()));
 
             // If we don't see any tags
             if(detections.size() == 0)
@@ -113,6 +116,7 @@ public class AprilTagCamera {
                     Orientation rot = Orientation.getOrientation(detection.pose.R, AxesReference.INTRINSIC, AxesOrder.YXZ, AngleUnit.DEGREES);
 
                     telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
+                    telemetry.addLine(String.format("Decision Margin: %f", detection.decisionMargin));
                     telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x*FEET_PER_METER));
                     telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y*FEET_PER_METER));
                     telemetry.addLine(String.format("Translation Z: %.2f feet", detection.pose.z*FEET_PER_METER));

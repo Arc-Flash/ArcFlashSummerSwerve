@@ -89,7 +89,7 @@ public class PFOdometry extends AbstractOdometry {
     }
 
     public String getTelemetry(){
-        return String.format(Locale.ENGLISH,"X Position: .2%f \nY Position: .2%f \nZ Position: .2%f ", getX(),getY(),getZ());
+        return String.format(Locale.ENGLISH,"X Position: .2%f \nY Position: .2%f \nZ Angle: .2%f ", getX(),getY(),getZ().deg());
 
     }
 }
