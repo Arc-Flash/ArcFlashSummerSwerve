@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.pathfinder;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.apriltag.AprilTagCamera;
 import org.firstinspires.ftc.teamcode.apriltag.AprilTagFieldConstants;
@@ -77,12 +81,13 @@ public class PFOdometry extends AbstractOdometry {
     @Override
     public PointXYZ getRawPosition() {
         AprilTagDetection detection = camera.getLastDetection();
+        Orientation rot = Orientation.getOrientation(detection.pose.R, AxesReference.INTRINSIC, AxesOrder.YXZ, AngleUnit.DEGREES);
         //Placeholder
         if(detection.decisionMargin > 30 ){
         odometry.offsetSoPositionIs( new PointXYZ(
                 AprilTagFieldConstants.getTagPose(detection.id).x() + detection.pose.x,
                 AprilTagFieldConstants.getTagPose(detection.id).y() + detection.pose.y,
-                AprilTagFieldConstants.getTagPose(detection.id).z().rad() + detection.pose.z));
+                AprilTagFieldConstants.getTagPose(detection.id).z().deg() + rot.firstAngle));
     }
         PointXYZ position = odometry.getPosition();
         return position;
