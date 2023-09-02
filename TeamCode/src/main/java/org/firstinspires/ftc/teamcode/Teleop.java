@@ -133,6 +133,8 @@ public class Teleop extends CommandOpMode {
         //PATHFINDER TELEOP, Don't run before commenting other drive stuff
         pathfinder.teleopDrive(gamepadEx);
         pathfinder.loop();
+
+
     }
 
     private double joystickScalar(double num, double min) {

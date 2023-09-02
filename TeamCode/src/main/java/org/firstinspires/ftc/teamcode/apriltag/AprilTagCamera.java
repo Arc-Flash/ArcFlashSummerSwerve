@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.apriltag;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
+
+
 import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -129,6 +131,11 @@ public class AprilTagCamera {
             telemetry.update();
         }
 
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
