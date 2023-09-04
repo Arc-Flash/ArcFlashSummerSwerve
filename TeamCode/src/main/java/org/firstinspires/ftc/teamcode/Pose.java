@@ -12,6 +12,8 @@ public class Pose extends Point {
         super(x, y);
         this.heading = heading;
     }
+
+
     public Pose(Point p, double heading) {
         this(p.x, p.y, heading);
     }

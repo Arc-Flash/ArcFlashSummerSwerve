@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.checkerframework.checker.units.qual.A;
+import org.firstinspires.ftc.teamcode.Pose;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.SwerveModule;
 import org.firstinspires.ftc.teamcode.apriltag.AprilTagCamera;
@@ -65,12 +66,12 @@ public class PFinder {
 
 
 
-    public void teleopDrive(GamepadEx gamepadEx){
+    public void teleopDrive(Pose pose){
 
 
-            double x = gamepadEx.getLeftX();
-            double y = gamepadEx.getLeftY();
-            double z = gamepadEx.getRightX();
+            double x = pose.x;
+            double y = pose.y;
+            double z = pose.heading;
 
             Translation translation = new Translation(x, y, z);
 
